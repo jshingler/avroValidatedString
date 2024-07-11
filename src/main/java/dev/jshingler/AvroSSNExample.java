@@ -21,7 +21,7 @@ public class AvroSSNExample {
                      "type": {
                              "type": "string",
                              "logicalType": "validated-string",
-                             "pattern": "^[0-9]{4}-[0-9]{2}$"
+                             "pattern": "^[0-9]{3}-[0-9]{2}-[0-9]{4}$"
                            }}
                 ]}""";
 
