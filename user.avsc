@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "User",
+  "fields": [
+    {"name": "name", "type": "string"},
+    {"name": "age", "type": "int"},
+    {"name": "email", "type": ["null", "string"], "default": null},
+    {
+      "name": "sessionId",
+      "type": {
+        "type": "string",
+        "logicalType": "validated-string",
+        "pattern": "^[0-9]{4}-[0-9]{2}$"
+      }
+    }
+  ]
+}
