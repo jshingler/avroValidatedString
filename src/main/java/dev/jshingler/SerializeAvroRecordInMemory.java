@@ -35,32 +35,11 @@ public class SerializeAvroRecordInMemory {
                   ]
                 }""";
 
+        // **IMPORTANT:** ValidatedString must be registered before parsing the schema
+        // Could be done in application startup to minimize impact
         ValidatedString.register();
 
-
-//        LogicalTypes.register(ValidatedString.VALIDATED_STRING_LOGICAL_TYPE, new LogicalTypes.LogicalTypeFactory() {
-//
-//            private final LogicalType validatedString = new ValidatedString();
-//
-//            @Override
-//            public LogicalType fromSchema(Schema schema) {
-//                return validatedString;
-//            }
-//        });
-//
-//        GenericData.get().addLogicalTypeConversion(new ValidatedString.ValidatedStringConversion(new ValidatedString()));
-//        SpecificData.get().addLogicalTypeConversion(new ValidatedString.ValidatedStringConversion(new ValidatedString()));
-
         Schema schema = new Schema.Parser().parse(schemaJson);
-
-//        Schema schema = new Schema.Parser().parse("{\n" +
-//                "  \"type\": \"record\",\n" +
-//                "  \"name\": \"User\",\n" +
-//                "  \"fields\": [\n" +
-//                "    {\"name\": \"name\", \"type\": \"string\"},\n" +
-//                "    {\"name\": \"age\", \"type\": \"int\"}\n" +
-//                "  ]\n" +
-//                "}");
 
         // Create a generic Avro record (replace with your actual data)
         GenericRecord userRecord = new GenericData.Record(schema);

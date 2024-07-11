@@ -5,22 +5,8 @@ import org.apache.avro.LogicalType;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.avro.generic.GenericData.EnumSymbol;
-import org.apache.avro.io.DatumReader;
-import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificData;
-import org.apache.avro.specific.SpecificDatumReader;
-import org.apache.avro.specific.SpecificDatumWriter;
-import org.apache.avro.specific.SpecificRecordBase;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
 
-import java.nio.ByteBuffer;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class ValidatedString extends LogicalType {
@@ -29,6 +15,7 @@ public class ValidatedString extends LogicalType {
     private static final String PATTERN = "pattern";
 
     private Pattern pattern;
+    private Schema schema;
 
     public ValidatedString() {
         super(VALIDATED_STRING_LOGICAL_TYPE);
@@ -45,6 +32,7 @@ public class ValidatedString extends LogicalType {
             throw new IllegalArgumentException("Invalid validated string: missing pattern");
         }
 
+        this.schema = schema;
         this.pattern = Pattern.compile(schema.getProp("pattern"));
     }
 
@@ -63,15 +51,6 @@ public class ValidatedString extends LogicalType {
         return schema.getProp(name) != null;
     }
 
-    private String getString(Schema schema, String name) {
-        Object obj = schema.getObjectProp(name);
-        if (obj instanceof String) {
-            return (String) obj;
-        }
-        throw new IllegalArgumentException(
-                "Expected Strrng " + name + ": " + (obj == null ? "null" : obj + ":" + obj.getClass().getSimpleName()));
-    }
-
     @Override
     public void validate(Schema schema) {
         super.validate(schema);
@@ -79,6 +58,7 @@ public class ValidatedString extends LogicalType {
         if (schema.getType() != Schema.Type.STRING ) {
             throw new IllegalArgumentException("Logical type validated-string must be backed by string");
         }
+        this.schema = schema;
         pattern = Pattern.compile(schema.getProp("pattern"));
         if (pattern == null) {
             throw new IllegalArgumentException("Invalid validated-string pattern: " + pattern + " (must be a regular expression)");
@@ -87,7 +67,7 @@ public class ValidatedString extends LogicalType {
 
     public void validate(String value) {
         if (!pattern.matcher(value).matches()) {
-            throw new IllegalArgumentException("invalid string: " + value);
+            throw new IllegalArgumentException("Invalid String: " + value + " Expected: " + pattern.toString());
         }
     }
 
@@ -104,12 +84,8 @@ public class ValidatedString extends LogicalType {
 
         GenericData.get().addLogicalTypeConversion(new ValidatedString.ValidatedStringConversion(new ValidatedString()));
         SpecificData.get().addLogicalTypeConversion(new ValidatedString.ValidatedStringConversion(new ValidatedString()));
-//        LogicalTypes.register("validated-string", ValidatedString::new);
     }
 
-//    public static void addConversion() {
-//        GenericData.get().addLogicalTypeConversion(new ValidatedStringConversion(new ValidatedString()));
-//    }
 
     public static class ValidatedStringConversion extends Conversion<String> {
         private final ValidatedString logicalType;
@@ -140,15 +116,6 @@ public class ValidatedString extends LogicalType {
             ((ValidatedString) type).validate(value);
             return value;
         }
-
-//        public String fromBytes(ByteBuffer value, Schema schema, LogicalType type) {
-//            throw new UnsupportedOperationException("fromBytes is not supported for " + type.getName());
-//        }
-//
-//        public ByteBuffer toBytes(String value, Schema schema, LogicalType type) {
-//            throw new UnsupportedOperationException("toBytes is not supported for " + type.getName());
-//        }
-
 
     }
 }

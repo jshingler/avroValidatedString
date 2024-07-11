@@ -27,32 +27,11 @@ public class AvroExample {
                   ]
                 }""";
 
-        LogicalTypes.register(ValidatedString.VALIDATED_STRING_LOGICAL_TYPE, new LogicalTypes.LogicalTypeFactory() {
-            private final LogicalType validatedString = new ValidatedString();
-            @Override
-            public LogicalType fromSchema(Schema schema) {
-                return validatedString;
-            }
-        });
+        // **IMPORTANT:** ValidatedString must be registered before parsing the schema
+        // Could be done in application startup to minimize impact
+        ValidatedString.register();
 
-        // Register the custom logical type
-//        ValidatedString.register();
-//        ValidatedString.addConversion();
-
-//        LogicalTypes.register(ValidatedString.VALIDATED_STRING_LOGICAL_TYPE, ValidatedString::new);
         Schema schema = new Schema.Parser().parse(schemaJson);
-//        LogicalTypes.register(ValidatedString.VALIDATED_STRING_LOGICAL_TYPE, new LogicalTypes.LogicalTypeFactory() {
-//            private final LogicalType validatedString = new ValidatedString(schema.getField("sessionId").schema());
-//            @Override
-//            public LogicalType fromSchema(Schema schema) {
-//                return validatedString;
-//            }
-//        });
-
-
-
-//        LogicalTypes.register("ValidatedString.VALIDATED_STRING_LOGICAL_TYPE, ValidatedString::new);
-
         GenericData.get().addLogicalTypeConversion(new ValidatedString.ValidatedStringConversion(new ValidatedString()));
 
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
@@ -61,9 +40,12 @@ public class AvroExample {
 
 
         GenericRecord record = builder.build();
-//        GenericData gd = GenericData.get();
-//        boolean b = gd.validate(schema, record);
+        GenericData gd = GenericData.get();
+        boolean b = gd.validate(schema, record);
         System.out.println("Record is valid: " + record);
+
+        // This Passes because the record values are set but the records is never serialzed.
+        // Validation happens on serialization and deserialization
     }
 }
 
